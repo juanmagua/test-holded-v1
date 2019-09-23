@@ -194,5 +194,27 @@ $app->put('/widgets', function(Request $request, Response $response, array $args
     }
 });
 
+$app->delete('/widgets/{id}', function(Request $request, Response $response, array $args){
+    
+    $id = $args['id'];
+    
+    $db = new dbHandler();
+    
+    $response_data = array();
+    
+    if($db->removeWidget($id)){
+        $response_data['error'] = false; 
+        $response_data['message'] = 'Widget has been deleted';    
+    }else{
+        $response_data['error'] = true; 
+        $response_data['message'] = 'Plase try again later';
+    }
+    
+    $response->write(json_encode($response_data));
+    return $response
+    ->withHeader('Content-type', 'application/json')
+    ->withStatus(200);
+});
+
 
 $app->run();

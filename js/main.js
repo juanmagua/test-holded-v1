@@ -3,11 +3,12 @@ var rootURL = "http://localhost:8080/";
 
 var currentWidget;
 
-var currentList;
+var currentList = [];
 
 var $token = localStorage.getItem("token");
 
-var $username = localStorage.getItem("username");;
+var $username = localStorage.getItem("username");
+;
 
 console.log($token, $username);
 
@@ -40,6 +41,13 @@ $(document).ready(function () {
         return false;
     });
 
+    $('#btnDelete').click(function () {
+        if (confirm("Are you sure?")) {
+            deleteWidget();
+        }
+        return false;
+    });
+
     $('body').on('click', '.edit-widget', function () {
 
         console.log("id" + $(this).attr('id'));
@@ -58,12 +66,6 @@ $(document).ready(function () {
 
     });
 
-
-    $('#btnDelete').click(function () {
-        deleteWidget();
-        return false;
-    });
-
 });
 
 
@@ -71,9 +73,10 @@ function init() {
 
     console.log($token);
 
-    if ($token !== 'undefined' ) {
+    if ($token !== 'undefined') {
         $("#dashboard").show();
         $("#login").hide();
+        $(".blog-header-logo").html("Hey," + $username);
         findAll();
     } else {
         $("#login").show();
@@ -159,7 +162,11 @@ function createWidget() {
         },
         success: function (data, textStatus, jqXHR) {
 
+            console.log(currentList.length);
+
             currentList.push(data.widget);
+
+            console.log(currentList.length);
 
             renderList(currentList);
 
@@ -197,27 +204,50 @@ function updateWidget() {
     });
 }
 
-function deleteWine() {
-    console.log('deleteWine');
+function deleteWidget() {
+    console.log('deleteWidget');
     $.ajax({
         type: 'DELETE',
-        url: rootURL + '/' + $('#wineId').val(),
+        url: rootURL + 'widgets/' + $('#widget-id').val(),
         success: function (data, textStatus, jqXHR) {
-            alert('Wine deleted successfully');
+            
+            
+            alert('Widget deleted successfully');
+            
+            RemoveWidgetList($('#widget-id').val());
+            
+            renderList(currentList);
+            
+            $('#modal-widget').modal('hide');
+            
         },
         error: function (jqXHR, textStatus, errorThrown) {
-            alert(xjqXHRhr.responseText);
+            alert(jqXHR.responseText);
         }
     });
+}
+
+function RemoveWidgetList(id){
+    
+    $.each(currentList, function (index, obj) {
+        if (obj.id == id) { // id.toString() if it is intso
+            
+            currentList.splice(index, 1);
+            
+            return false;
+        }
+    });
+
+    
 }
 
 function renderList(data) {
 
     currentList = data;
 
-    if (data.length > 0) {
+    if (currentList.length > 0) {
         $('#dashboard-widgets').html("");
-        $.each(data, function (index, widget) {
+        $.each(currentList, function (index, widget) {
             // TODO: Render
             $('#dashboard-widgets').append('<div data-title="' + widget.title + '" id="' + widget.id + '" class="edit-widget" style="display: none;width: ' + widget.width + 'px; height:' + widget.height + 'px; background-color: ' + widget.color + ';float: left"></div>');
 

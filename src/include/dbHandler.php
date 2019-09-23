@@ -163,7 +163,7 @@ class dbHandler {
 
             $bulk = new MongoDB\Driver\BulkWrite;
 
-            $bulk->delete(['id' => $id]);
+            $bulk->delete(['_id' => $id]);
 
             $this->con->executeBulkWrite('test.widgets', $bulk);
 
