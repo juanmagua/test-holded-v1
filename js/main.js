@@ -108,6 +108,12 @@ function login() {
     });
 }
 
+function logout() {
+    localStorage.clear();
+    $("#login").show();
+    $("#dashboard").hide();
+}
+
 function findAll() {
     console.log('findAll');
     $.ajax({
@@ -117,7 +123,13 @@ function findAll() {
         headers: {
             Authorization: localStorage.getItem("token")
         },
-        success: renderList
+        success: renderList,
+        error: function (jqXHR, textStatus, errorThrown) {
+            var responseText = jqXHR.responseText;
+            var responseTextAsAnObject = JSON.parse(responseText);
+            alert(responseTextAsAnObject.message);
+            logout();
+        }
     });
 }
 
@@ -248,9 +260,9 @@ function RemoveWidgetList(id) {
 }
 
 function renderList(data) {
-    
+
     console.log(data);
-    
+
     currentList = data;
 
     if (currentList.length > 0) {

@@ -8,8 +8,9 @@ require '../vendor/autoload.php';
 $config['displayErrorDetails'] = true;
 $config['determineRouteBeforeAppMiddleware'] = true;
 
-
 $app = new \Slim\App(['settings' => $config]);
+
+//$tokenAuth = $app->request->headers->get('Authorization');
 
 $app->options('/{routes:.+}', function ($request, $response, $args) {
     return $response;
@@ -17,6 +18,7 @@ $app->options('/{routes:.+}', function ($request, $response, $args) {
 
 $app->add(function ($req, $res, $next) {
     $response = $next($req, $res);
+
     return $response
                     ->withHeader('Access-Control-Allow-Origin', '*')
                     ->withHeader('Access-Control-Allow-Headers', 'X-Requested-With, Content-Type, Accept, Origin, Authorization')
@@ -26,11 +28,24 @@ $app->add(function ($req, $res, $next) {
 require '../include/dbHandler.php';
 
 $app->get('/test', function(Request $request, Response $response) {
-    $username = "test";
-    $password = password_hash("holden", PASSWORD_DEFAULT);
-    echo $password;
-    die;
+
+    $token = $app->request->headers->get("Authorization");
+    echo $token;
+    die($token);
 });
+
+function validateToken($token) {
+    
+    $db = new dbHandler();
+
+    $user = $db->getUserByToken($token);
+    
+    if ($user != null) {
+        return true;
+    }
+
+    return false;
+}
 
 // login
 $app->post('/login', function(Request $request, Response $response) {
@@ -46,7 +61,7 @@ $app->post('/login', function(Request $request, Response $response) {
     $user = $db->getUser($username);
 
 
-    // User Exist
+// User Exist
     if ($user == null) {
         $message = array();
         $message['error'] = true;
@@ -89,23 +104,35 @@ $app->post('/login', function(Request $request, Response $response) {
 // GET ALL
 $app->get('/widgets', function(Request $request, Response $response) {
 
+    $token = ($request->getHeader('AUTHORIZATION')) ? $request->getHeader('AUTHORIZATION')[0] : NULL;
+    
+    if (! validateToken($token)) {
+        $message = array();
+        $message['error'] = false;
+        $message['message'] = 'Token Failed!';
+        $response->write(json_encode($message));
+        return $response
+                        ->withHeader('Access-Control-Allow-Origin', '*')
+                        ->withHeader('Content-type', 'application/json')
+                        ->withStatus(500);
+    }
+
     $db = new dbHandler();
     $cur = $db->getAllWidgets();
     //Variable to store result
     $result = array();
 
 
-
-    //Do itteration for all document in a collection
+//Do itteration for all document in a collection
     foreach ($cur as $doc) {
         $tmp = array();
-        //Set key and get value from document and store to temporary array
+//Set key and get value from document and store to temporary array
         $tmp["id"] = (string) $doc->_id;
         $tmp["title"] = $doc->title;
         $tmp["color"] = $doc->color;
         $tmp["width"] = $doc->width;
         $tmp["height"] = $doc->height;
-        //push temporary array to $result
+//push temporary array to $result
         array_push($result, $tmp);
     }
 
@@ -135,7 +162,7 @@ $app->post('/widgets', function(Request $request, Response $response) {
         $message = array();
         $message['error'] = false;
         $message['message'] = 'User created successfully';
-        $message['widget'] = array('id' => $cur, 'title' => $title, 'color' =>$color,'width' => $width, 'heigth' => $height);
+        $message['widget'] = array('id' => $cur, 'title' => $title, 'color' => $color, 'width' => $width, 'heigth' => $height);
         $response->write(json_encode($message));
         return $response
                         ->withHeader('Access-Control-Allow-Origin', '*')
@@ -194,26 +221,26 @@ $app->put('/widgets', function(Request $request, Response $response, array $args
     }
 });
 
-$app->delete('/widgets/{id}', function(Request $request, Response $response, array $args){
-    
+$app->delete('/widgets/{id}', function(Request $request, Response $response, array $args) {
+
     $id = $args['id'];
-    
+
     $db = new dbHandler();
-    
+
     $response_data = array();
-    
-    if($db->removeWidget($id)){
-        $response_data['error'] = false; 
-        $response_data['message'] = 'Widget has been deleted';    
-    }else{
-        $response_data['error'] = true; 
+
+    if ($db->removeWidget($id)) {
+        $response_data['error'] = false;
+        $response_data['message'] = 'Widget has been deleted';
+    } else {
+        $response_data['error'] = true;
         $response_data['message'] = 'Plase try again later';
     }
-    
+
     $response->write(json_encode($response_data));
     return $response
-    ->withHeader('Content-type', 'application/json')
-    ->withStatus(200);
+                    ->withHeader('Content-type', 'application/json')
+                    ->withStatus(200);
 });
 
 

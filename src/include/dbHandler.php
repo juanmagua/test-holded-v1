@@ -36,6 +36,30 @@ class dbHandler {
             return $e->getMessage();
         }
     }
+    
+    public function getUserByToken($token) {
+
+        try {
+
+            $filter = array('token' => $token);
+            $options = array(
+                'limit' => 1
+            );
+
+            $query = new MongoDB\Driver\Query($filter, $options);
+
+            $users = $this->con->executeQuery("test.users", $query);
+
+            foreach ($users as $user) {
+                return $user;
+            }
+
+            return NULL;
+        } catch (MongoDB\Driver\Exception\Exception $e) {
+
+            return $e->getMessage();
+        }
+    }
 
     public function validatePassword($password, $password_hash) {
 
@@ -158,9 +182,8 @@ class dbHandler {
 
     public function removeWidget($id) {
 
-
         try {
-            
+
             $_id = new MongoDB\BSON\ObjectID($id);
 
             $bulk = new MongoDB\Driver\BulkWrite;
@@ -170,7 +193,6 @@ class dbHandler {
             $this->con->executeBulkWrite('test.widgets', $bulk);
 
             return true;
-            
         } catch (MongoDB\Driver\Exception\Exception $e) {
             return false;
         }
