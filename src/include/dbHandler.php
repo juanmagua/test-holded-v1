@@ -20,13 +20,13 @@ class dbHandler {
             $options = array(
                 'limit' => 1
             );
-            
+
 
             $query = new MongoDB\Driver\Query($filter, $options);
 
             $users = $this->con->executeQuery("test.users", $query);
-            
-            foreach($users as $user){
+
+            foreach ($users as $user) {
                 return $user;
             }
 
@@ -38,8 +38,8 @@ class dbHandler {
     }
 
     public function validatePassword($password, $password_hash) {
-        
-        if (password_verify($password, $password_hash )) {
+
+        if (password_verify($password, $password_hash)) {
 
             return true;
         }
@@ -160,16 +160,19 @@ class dbHandler {
 
 
         try {
+            
+            $_id = new MongoDB\BSON\ObjectID($id);
 
             $bulk = new MongoDB\Driver\BulkWrite;
 
-            $bulk->delete(['_id' => $id]);
+            $bulk->delete(['_id' => $_id]);
 
             $this->con->executeBulkWrite('test.widgets', $bulk);
 
-            return REMOVE_SUCCESS;
+            return true;
+            
         } catch (MongoDB\Driver\Exception\Exception $e) {
-            return REMOVE_FAILED;
+            return false;
         }
     }
 

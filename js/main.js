@@ -26,16 +26,17 @@ $(document).ready(function () {
     $('#add-widget').click(function () {
         cleanForm();
         $('#modal-widget').modal('show');
+        $('#btnSave').text('Create');
+        $('#btnDelete').hide();
+
         return false;
     });
 
     // BTN CREATE O UPDATE
     $('#btnSave').click(function () {
         if ($('#widget-id').val() == '') {
-            $('#btnSave').text('Create');
             createWidget();
         } else {
-            $('#btnSave').text('Update');
             updateWidget();
         }
         return false;
@@ -50,13 +51,15 @@ $(document).ready(function () {
 
     $('body').on('click', '.edit-widget', function () {
 
-        console.log("id" + $(this).attr('id'));
+        console.log("id " + $(this).attr('id'));
 
         var $widget = findById($(this).attr('id'));
 
-        console.log("lo encontro:" + $widget);
+        console.log("lo encontro: " + $widget);
 
         renderDetails($widget);
+
+        $('#btnDelete').show();
 
         $('#btnSave').text('Update');
 
@@ -73,7 +76,7 @@ function init() {
 
     console.log($token);
 
-    if ($token !== 'undefined') {
+    if ($token !== 'undefined' && $token !== null) {
         $("#dashboard").show();
         $("#login").hide();
         $(".blog-header-logo").html("Hey," + $username);
@@ -95,6 +98,8 @@ function login() {
         success: function (data, textStatus, jqXHR) {
             localStorage.setItem("token", data.user.token);
             localStorage.setItem("username", data.user.username);
+            $token = data.user.token;
+            $username = data.user.username;
             init();
         },
         error: function (jqXHR, textStatus, errorThrown) {
@@ -139,10 +144,7 @@ function _update(widget) {
     var _obj = null;
     $.each(currentList, function (index, obj) {
         if (obj.id == widget.id) { // id.toString() if it is intso
-            console.log(currentList[index]);
             currentList[index] = widget;
-            console.log(currentList[index]);
-
             return false;
         }
     });
@@ -150,6 +152,14 @@ function _update(widget) {
 }
 
 function createWidget() {
+
+    console.log("err" + validateForm());
+
+    if (validateForm()) {
+        return false;
+    }
+
+
     console.log('createWidget');
     $.ajax({
         type: 'POST',
@@ -162,11 +172,7 @@ function createWidget() {
         },
         success: function (data, textStatus, jqXHR) {
 
-            console.log(currentList.length);
-
             currentList.push(data.widget);
-
-            console.log(currentList.length);
 
             renderList(currentList);
 
@@ -210,16 +216,16 @@ function deleteWidget() {
         type: 'DELETE',
         url: rootURL + 'widgets/' + $('#widget-id').val(),
         success: function (data, textStatus, jqXHR) {
-            
-            
+
+
             alert('Widget deleted successfully');
-            
+
             RemoveWidgetList($('#widget-id').val());
-            
+
             renderList(currentList);
-            
+
             $('#modal-widget').modal('hide');
-            
+
         },
         error: function (jqXHR, textStatus, errorThrown) {
             alert(jqXHR.responseText);
@@ -227,22 +233,24 @@ function deleteWidget() {
     });
 }
 
-function RemoveWidgetList(id){
-    
+function RemoveWidgetList(id) {
+
     $.each(currentList, function (index, obj) {
         if (obj.id == id) { // id.toString() if it is intso
-            
+
             currentList.splice(index, 1);
-            
+
             return false;
         }
     });
 
-    
+
 }
 
 function renderList(data) {
-
+    
+    console.log(data);
+    
     currentList = data;
 
     if (currentList.length > 0) {
@@ -258,6 +266,7 @@ function renderList(data) {
 }
 
 function cleanForm() {
+    $(".invalid-feedback").hide();
     $('#widget-id').val('');
     $('#title').val('');
     $('#color').val('');
@@ -290,5 +299,41 @@ function loginFormToJSON() {
         "username": $('#username').val(),
         "password": $('#password').val()
     });
+}
+
+function validateForm() {
+
+    var $validate = false;
+
+    if ($('#title').val() == '') {
+        $(".invalid-title").show();
+        $validate = true;
+    } else {
+        $(".invalid-title").hide();
+    }
+
+    if ($('#color').val() == '') {
+        $(".invalid-color").show();
+        $validate = true;
+
+    } else {
+        $(".invalid-color").hide();
+    }
+    if ($('#width').val() == '') {
+        $(".invalid-width").show();
+        $validate = true;
+
+    } else {
+        $(".invalid-width").hide();
+    }
+    if ($('#height').val() == '') {
+        $(".invalid-height").show();
+        $validate = true;
+
+    } else {
+        $(".invalid-heigth").hide();
+    }
+
+    return $validate;
 }
 

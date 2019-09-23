@@ -135,7 +135,7 @@ $app->post('/widgets', function(Request $request, Response $response) {
         $message = array();
         $message['error'] = false;
         $message['message'] = 'User created successfully';
-        $message['widget'] = array($cur, $title, $color, $width, $height);
+        $message['widget'] = array('id' => $cur, 'title' => $title, 'color' =>$color,'width' => $width, 'heigth' => $height);
         $response->write(json_encode($message));
         return $response
                         ->withHeader('Access-Control-Allow-Origin', '*')
