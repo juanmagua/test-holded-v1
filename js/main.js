@@ -51,11 +51,9 @@ $(document).ready(function () {
 
     $('body').on('click', '.edit-widget', function () {
 
-        console.log("id " + $(this).attr('id'));
-
         var $widget = findById($(this).attr('id'));
 
-        console.log("lo encontro: " + $widget);
+        cleanForm();
 
         renderDetails($widget);
 
@@ -231,10 +229,15 @@ function deleteWidget() {
 
 
             alert('Widget deleted successfully');
-
+            
+            console.log(currentList.length);
+            
             RemoveWidgetList($('#widget-id').val());
 
             renderList(currentList);
+            
+            console.log(currentList.length);
+            
 
             $('#modal-widget').modal('hide');
 
