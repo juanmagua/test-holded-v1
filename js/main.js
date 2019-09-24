@@ -8,7 +8,6 @@ var currentList = [];
 var $token = localStorage.getItem("token");
 
 var $username = localStorage.getItem("username");
-;
 
 console.log($token, $username);
 
@@ -19,6 +18,11 @@ $(document).ready(function () {
 
     $('#btn-login').click(function () {
         login();
+        return false;
+    });
+    
+     $('#btn-logout').click(function () {
+        logout();
         return false;
     });
 
@@ -101,7 +105,9 @@ function login() {
             init();
         },
         error: function (jqXHR, textStatus, errorThrown) {
-            alert("Login Failed");
+            var responseText = jqXHR.responseText;
+            var responseTextAsAnObject = JSON.parse(responseText);
+            alert(responseTextAsAnObject.message);
         }
     });
 }
@@ -119,7 +125,7 @@ function findAll() {
         url: rootURL + 'widgets',
         dataType: "json", // data type of response
         headers: {
-            Authorization: localStorage.getItem("token")
+            Authorization: "Bearer " + $token
         },
         success: renderList,
         error: function (jqXHR, textStatus, errorThrown) {
@@ -178,7 +184,7 @@ function createWidget() {
         dataType: "json",
         data: formToJSON(),
         headers: {
-            Authorization: $token
+            Authorization: "Bearer " + $token
         },
         success: function (data, textStatus, jqXHR) {
 
@@ -190,7 +196,9 @@ function createWidget() {
 
         },
         error: function (jqXHR, textStatus, errorThrown) {
-            alert(xjqXHRhr.responseText);
+            var responseText = jqXHR.responseText;
+            var responseTextAsAnObject = JSON.parse(responseText);
+            alert(responseTextAsAnObject.message);
         }
     });
 }
@@ -204,7 +212,7 @@ function updateWidget() {
         dataType: "json",
         data: formToJSON(),
         headers: {
-            Authorization: localStorage.getItem("token")
+            Authorization: "Bearer " + $token
         },
         success: function (data, textStatus, jqXHR) {
 
@@ -215,7 +223,9 @@ function updateWidget() {
             $('#modal-widget').modal('hide');
         },
         error: function (jqXHR, textStatus, errorThrown) {
-            alert(alert(xjqXHRhr.responseText));
+            var responseText = jqXHR.responseText;
+            var responseTextAsAnObject = JSON.parse(responseText);
+            alert(responseTextAsAnObject.message);
         }
     });
 }
@@ -225,6 +235,9 @@ function deleteWidget() {
     $.ajax({
         type: 'DELETE',
         url: rootURL + 'widgets/' + $('#widget-id').val(),
+        headers: {
+            Authorization: "Bearer " + $token
+        },
         success: function (data, textStatus, jqXHR) {
 
 
@@ -243,7 +256,9 @@ function deleteWidget() {
 
         },
         error: function (jqXHR, textStatus, errorThrown) {
-            alert(jqXHR.responseText);
+            var responseText = jqXHR.responseText;
+            var responseTextAsAnObject = JSON.parse(responseText);
+            alert(responseTextAsAnObject.message);
         }
     });
 }
@@ -264,8 +279,6 @@ function RemoveWidgetList(id) {
 
 function renderList(data) {
 
-    console.log(data);
-
     currentList = data;
 
     if (currentList.length > 0) {
@@ -282,12 +295,8 @@ function renderList(data) {
 
 function cleanForm() {
     $(".invalid-feedback").hide();
-    $('#widget-id').val('');
-    $('#title').val('');
-    $('#color').val('');
-    $('#width').val('');
-    $('#height').val('');
-}
+    $('#widget-id, #title, #color, #width, #height').val('');
+ }
 
 function renderDetails(widget) {
     console.log(widget);

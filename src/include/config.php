@@ -1,7 +1,9 @@
 <?php
 //Database static
 define('DB_NAME', 'test');
+
 define('DB_COLLECTION_WIDGETS','widgets');
+
 define('DB_COLLECTION_USERS','users');
 
 define('INSERT_SUCCESS', 0);
