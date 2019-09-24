@@ -126,31 +126,27 @@ $app->post('/widgets', function(Request $request, Response $response) {
     $width = $request_data['width'];
     $height = $request_data['height'];
 
+    $message = array();
+        
 
     $db = new dbHandler();
     $cur = $db->insertWidget($title, $color, $width, $height);
 
     if ($cur) {
-        $message = array();
-        $message['error'] = false;
         $message['message'] = 'User created successfully';
         $message['widget'] = array('id' => $cur, 'title' => $title, 'color' => $color, 'width' => $width, 'heigth' => $height);
         $response->write(json_encode($message));
         return $response
                         ->withHeader('Access-Control-Allow-Origin', '*')
                         ->withHeader('Content-type', 'application/json')
-                        ->withStatus(200);
+                        ->withStatus(201);
     } else {
-
-        $message = array();
-        $message['error'] = true;
         $message['message'] = 'INSERT_FAILED';
-
         $response->write(json_encode($message));
         return $response
                         ->withHeader('Access-Control-Allow-Origin', '*')
                         ->withHeader('Content-type', 'application/json')
-                        ->withStatus(500);
+                        ->withStatus(400);
     }
 });
 
@@ -169,27 +165,23 @@ $app->put('/widgets', function(Request $request, Response $response, array $args
 
     $db = new dbHandler();
     $cur = $db->updateWidget($id, $title, $color, $width, $height);
+    $message = array();
 
     if ($cur) {
-        $message = array();
-        $message['error'] = false;
         $message['message'] = 'Update successfully';
         $message['widget'] = array('id' => $id, 'title' => $title, 'color' => $color, 'width' => $width, 'height' => $height);
         $response->write(json_encode($message));
         return $response
                         ->withHeader('Access-Control-Allow-Origin', '*')
                         ->withHeader('Content-type', 'application/json')
-                        ->withStatus(200);
+                        ->withStatus(204);
     } else {
-
-        $message = array();
-        $message['error'] = true;
         $message['message'] = 'Update failed';
         $response->write(json_encode($message));
         return $response
                         ->withHeader('Access-Control-Allow-Origin', '*')
                         ->withHeader('Content-type', 'application/json')
-                        ->withStatus(500);
+                        ->withStatus(400);
     }
 });
 
@@ -204,15 +196,18 @@ $app->delete('/widgets/{id}', function(Request $request, Response $response, arr
     if ($db->removeWidget($id)) {
         $response_data['error'] = false;
         $response_data['message'] = 'Widget has been deleted';
+        $response->write(json_encode($response_data));
+        return $response
+                    ->withHeader('Content-type', 'application/json')
+                    ->withStatus(204);
     } else {
         $response_data['error'] = true;
         $response_data['message'] = 'Plase try again later';
+        return $response
+                    ->withHeader('Content-type', 'application/json')
+                    ->withStatus(400);
     }
 
-    $response->write(json_encode($response_data));
-    return $response
-                    ->withHeader('Content-type', 'application/json')
-                    ->withStatus(200);
 });
 
 
