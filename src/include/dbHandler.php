@@ -11,7 +11,7 @@ class dbHandler {
         //Connect to database
         $this->con = $db->connect();
     }
-
+    
     public function getUser($username) {
 
         try {
@@ -32,35 +32,11 @@ class dbHandler {
 
             return NULL;
         } catch (MongoDB\Driver\Exception\Exception $e) {
-
+            
             return $e->getMessage();
         }
     }
     
-    public function getUserByToken($token) {
-
-        try {
-
-            $filter = array('token' => $token);
-            $options = array(
-                'limit' => 1
-            );
-
-            $query = new MongoDB\Driver\Query($filter, $options);
-
-            $users = $this->con->executeQuery("test.users", $query);
-
-            foreach ($users as $user) {
-                return $user;
-            }
-
-            return NULL;
-        } catch (MongoDB\Driver\Exception\Exception $e) {
-
-            return $e->getMessage();
-        }
-    }
-
     public function validatePassword($password, $password_hash) {
 
         if (password_verify($password, $password_hash)) {
@@ -69,32 +45,6 @@ class dbHandler {
         }
 
         return false;
-    }
-
-    public function updateUser($user_id, $token, $token_expire) {
-
-        try {
-
-            $bulk = new MongoDB\Driver\BulkWrite;
-
-            //Create array document
-            $document = array(
-                "token" => $token,
-                "token_expire" => $token_expire,
-            );
-
-            $_id = new MongoDB\BSON\ObjectID($user_id);
-
-            $bulk->update(['_id' => $_id], ['$set' => $document]);
-
-            $this->con->executeBulkWrite('test.users', $bulk);
-
-            return true;
-        } catch (MongoDB\Driver\Exception\Exception $e) {
-            var_dump($e->getMessage());
-            die;
-            return false;
-        }
     }
 
     //Get All 

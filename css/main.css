@@ -30,3 +30,9 @@ margin: auto;
 	background-color: #dc4943 !important;
 	border-color: #dc4943 !important;
 }
+
+.grid-sizer {
+  float: left;
+  width: 160px;
+  height: 60px;
+ }

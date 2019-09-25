@@ -17,11 +17,14 @@ $(document).ready(function () {
     init();
 
     $('#btn-login').click(function () {
-        login();
-        return false;
+        if($('#username, #password').val() != ''){
+            login();
+            return false;
+        }
+        notify('error', "Username/Password is required");
     });
-    
-     $('#btn-logout').click(function () {
+
+    $('#btn-logout').click(function () {
         logout();
         return false;
     });
@@ -90,7 +93,6 @@ function init() {
 }
 
 function login() {
-    console.log('login..');
     $.ajax({
         type: 'POST',
         contentType: 'application/json',
@@ -103,11 +105,12 @@ function login() {
             $token = data.user.token;
             $username = data.user.username;
             init();
+            notify('success', data.message);
         },
         error: function (jqXHR, textStatus, errorThrown) {
             var responseText = jqXHR.responseText;
             var responseTextAsAnObject = JSON.parse(responseText);
-            alert(responseTextAsAnObject.message);
+            notify('error', responseTextAsAnObject.message);
         }
     });
 }
@@ -116,6 +119,7 @@ function logout() {
     localStorage.clear();
     $("#login").show();
     $("#dashboard").hide();
+    notify('', "Good Bye!!");
 }
 
 function findAll() {
@@ -131,7 +135,7 @@ function findAll() {
         error: function (jqXHR, textStatus, errorThrown) {
             var responseText = jqXHR.responseText;
             var responseTextAsAnObject = JSON.parse(responseText);
-            alert(responseTextAsAnObject.message);
+            notify('error', responseTextAsAnObject.message);
             logout();
         }
     });
@@ -169,14 +173,10 @@ function _update(widget) {
 
 function createWidget() {
 
-    console.log("err" + validateForm());
-
     if (validateForm()) {
         return false;
     }
 
-
-    console.log('createWidget');
     $.ajax({
         type: 'POST',
         contentType: 'application/json',
@@ -193,18 +193,19 @@ function createWidget() {
             renderList(currentList);
 
             $('#modal-widget').modal('hide');
+            
+            notify('success', data.message);
 
         },
         error: function (jqXHR, textStatus, errorThrown) {
             var responseText = jqXHR.responseText;
             var responseTextAsAnObject = JSON.parse(responseText);
-            alert(responseTextAsAnObject.message);
+            notify('error', responseTextAsAnObject.message);
         }
     });
 }
 
 function updateWidget() {
-    console.log('updateWidget');
     $.ajax({
         type: 'PUT',
         contentType: 'application/json',
@@ -221,11 +222,13 @@ function updateWidget() {
             renderList(currentList);
 
             $('#modal-widget').modal('hide');
+            
+            notify('success', data.message);
         },
         error: function (jqXHR, textStatus, errorThrown) {
             var responseText = jqXHR.responseText;
             var responseTextAsAnObject = JSON.parse(responseText);
-            alert(responseTextAsAnObject.message);
+            notify('error', responseTextAsAnObject.message);
         }
     });
 }
@@ -240,25 +243,21 @@ function deleteWidget() {
         },
         success: function (data, textStatus, jqXHR) {
 
-
-            alert('Widget deleted successfully');
-            
-            console.log(currentList.length);
-            
             RemoveWidgetList($('#widget-id').val());
 
             renderList(currentList);
-            
-            console.log(currentList.length);
-            
 
             $('#modal-widget').modal('hide');
+            
+            console.log(data);
+            
+            notify('success', data.message);
 
         },
         error: function (jqXHR, textStatus, errorThrown) {
             var responseText = jqXHR.responseText;
             var responseTextAsAnObject = JSON.parse(responseText);
-            alert(responseTextAsAnObject.message);
+            notify('error', responseTextAsAnObject.message);
         }
     });
 }
@@ -281,22 +280,37 @@ function renderList(data) {
 
     currentList = data;
 
-    if (currentList.length > 0) {
-        $('#dashboard-widgets').html("");
-        $.each(currentList, function (index, widget) {
-            // TODO: Render
-            $('#dashboard-widgets').append('<div data-title="' + widget.title + '" id="' + widget.id + '" class="edit-widget" style="display: none;width: ' + widget.width + 'px; height:' + widget.height + 'px; background-color: ' + widget.color + ';float: left"></div>');
+    console.log(currentList, currentList.length);
 
-            $('#' + widget.id).show(2500);
+
+    $('#dashboard-widgets').html('');
+
+    if (currentList.length > 0) {
+        var $html = '';
+        $.each(currentList, function (index, widget) {
+            console.log(widget.height);
+            // TODO: Render
+            $html = $html + '<div data-title="' + widget.title + '" id="' + widget.id + '" class="m-1 edit-widget grid-item" style="display: none;width: ' + widget.width + 'px; height:' + widget.height + 'px; background-color: ' + widget.color + ';float: left"></div>';
 
         });
+
+        $('#dashboard-widgets').html($html);
+
+        $('.grid-item').show("slow");
+
+        /*('.grid').masonry({
+         itemSelector: '.grid-item',
+         columnWidth: 100,
+         gutter: 2
+         // horizontalOrder: true
+         });*/
     }
 }
 
 function cleanForm() {
     $(".invalid-feedback").hide();
     $('#widget-id, #title, #color, #width, #height').val('');
- }
+}
 
 function renderDetails(widget) {
     console.log(widget);
@@ -361,3 +375,10 @@ function validateForm() {
     return $validate;
 }
 
+function notify($levelMessage, $message) {
+    runNotify({
+        type: 'notify',
+        message: $message,
+        levelMessage: $levelMessage
+    });
+}
