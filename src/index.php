@@ -50,6 +50,7 @@ $app->add(new Tuupola\Middleware\JwtAuthentication([
 ]));
 
 $app->get('/test', function(Request $request, Response $response) {
+    var_dump( password_hash("holded", PASSWORD_BCRYPT));
     var_dump(getenv("JWT_SECRET"), $_ENV);
     die();
 });
