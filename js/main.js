@@ -206,6 +206,11 @@ function createWidget() {
 }
 
 function updateWidget() {
+    
+    if (validateForm()) {
+        return false;
+    }
+    
     $.ajax({
         type: 'PUT',
         contentType: 'application/json',

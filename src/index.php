@@ -1,11 +1,19 @@
 <?php
 
+date_default_timezone_set("UTC");
+error_reporting(E_ALL);
+ini_set("display_errors", 1);
+
 use \Psr\Http\Message\ServerRequestInterface as Request;
 use \Psr\Http\Message\ResponseInterface as Response;
 
 require 'vendor/autoload.php';
 require 'include/dbHandler.php';
 require 'include/authHelper.php';
+
+ $_ENV['APP_BASE_PATH'] = __DIR__;
+ $_ENV['JWT_SECRET'] = "holden-test";
+ 
 
 $config['displayErrorDetails'] = true;
 
@@ -30,7 +38,7 @@ $app->add(function ($req, $res, $next) {
 
 $app->add(new Tuupola\Middleware\JwtAuthentication([
     "path" => "/widgets",
-    "secret" => "holden-test", //getenv("JWT_SECRET")
+    "secret" => getenv("JWT_SECRET") ? getenv("JWT_SECRET") : $_ENV['JWT_SECRET'],
     "error" => function ($response, $arguments) {
         $data["status"] = "error";
         $data["message"] = $arguments["message"];
@@ -42,9 +50,8 @@ $app->add(new Tuupola\Middleware\JwtAuthentication([
 ]));
 
 $app->get('/test', function(Request $request, Response $response) {
-    $token = getenv('JWT_SECRET');
-    var_dump(getenv('DB_NAME'));
-    die($token);
+    var_dump(getenv("JWT_SECRET"), $_ENV);
+    die();
 });
 
 // login

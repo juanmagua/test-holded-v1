@@ -12,7 +12,7 @@ function generateJWT($uid){
     $future = new DateTime("now +2 hours");
     $jti = $base62->encode(random_bytes(16));
 
-    $secret = "holden-test";//getenv("JWT_SECRET");
+    $secret = getenv("JWT_SECRET") ? getenv("JWT_SECRET") : $_ENV['JWT_SECRET'];
 
     $payload = [
         "jti" => $jti,
